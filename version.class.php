@@ -1,6 +1,6 @@
 <?php
     namespace rocketpack;
-    use Exception
+    use Exception;
     
     class Version
     {
@@ -8,10 +8,12 @@
         private $minor;
         private $patch;
         private $complete_version;
+        private $package;
         
-        public function __construct($version)
+        public function __construct($package,$version)
         {
             $this->complete_version = $version;
+            $this->package          = $package;
             
             list($this->major,
                  $this->minor,
@@ -23,11 +25,11 @@
             list($major,$minor,$patch) = self::splitVersion($version);
             
             if($major != $this->major)
-                throw new MajorVersionMismatchException($major.' != '.$this->major.' (comparing '.$version.' to '.$this->complete_version.')');
+                throw new MajorVersionMismatchException($major.' != '.$this->major.' (comparing '.$version.' to '.$this->complete_version.' in package '.$this->package.')');
             if($minor != $this->minor)
-                throw new MinorVersionMismatchException($minor.' != '.$this->minor.' (comparing '.$version.' to '.$this->complete_version.')');
+                throw new MinorVersionMismatchException($minor.' != '.$this->minor.' (comparing '.$version.' to '.$this->complete_version.' in package '.$this->package.')');
             if($patch != $this->patch)
-                throw new MinorVersionMismatchException($patch.' != '.$this->patch.' (comparing '.$version.' to '.$this->complete_version.')');
+                throw new MinorVersionMismatchException($patch.' != '.$this->patch.' (comparing '.$version.' to '.$this->complete_version.' in package '.$this->package.')');
         }
         
         public static function splitVersion($version)
@@ -41,22 +43,7 @@
     }
 
     class InvalidVersionSchemaException extends Exception{}
-    
-    class VersionMismatchException extends Exception
-    {
-        private $package;
-        
-        public function setPackage($package)
-        {
-            $this->package = $package;
-        }
-        
-        public function getMessage()
-        {
-            return parent::getMessage().' for package: '.$this->package;
-        }
-    }
-
-    class MajorVersionMismatchException extends VersionMismatchExceptionException{}
-    class MinorVersionMismatchException extends VersionMismatchExceptionException{}
-    class PatchVersionMismatchException extends VersionMismatchExceptionException{}
+    class VersionMismatchException extends Exception{}
+    class MajorVersionMismatchException extends VersionMismatchException{}
+    class MinorVersionMismatchException extends VersionMismatchException{}
+    class PatchVersionMismatchException extends VersionMismatchException{}
