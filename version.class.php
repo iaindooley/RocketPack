@@ -26,7 +26,7 @@
             if($this->version[1] != $version[1])
                 throw new MinorVersionMismatchException($this->package,'Comparing '.implode('.',$this->version).' to '.implode('.',$version).' for package '.$this->package);
             if($this->version[2] != $version[2])
-                throw new MinorVersionMismatchException($this->package,'Comparing '.implode('.',$this->version).' to '.implode('.',$version).' for package '.$this->package);
+                throw new PatchVersionMismatchException($this->package,'Comparing '.implode('.',$this->version).' to '.implode('.',$version).' for package '.$this->package);
         }
     }
 

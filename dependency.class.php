@@ -6,21 +6,22 @@
     {
         private $versions;
         private $exceptions;
+        private $for_package;
 
-        private function __construct()
+        private function __construct($for_package)
         {
             $this->versions = array();
             $this->exceptions = array();
+            $this->for_package = $for_package;
         }
         
-        public static function add($name,$version)
+        public static function forPackage($name)
         {
-            $dep = new Dependency();
-            self::processDependency($dep,$name,$version);
+            $dep = new Dependency($name);
             return $dep;
         }
         
-        public function also($name,$version)
+        public function add($name,$version)
         {
             self::processDependency($this,$name,$version);
             return $this;
@@ -55,7 +56,11 @@
             if(!$rules)
                 $rules = new VerifyRules();
 
-            $rules->verify($this->exceptions);
+            if($out = $rules->verify($this->exceptions))
+            {
+                echo ' ----- For package: '.$this->for_package.PHP_EOL;
+                echo $out.PHP_EOL;
+            }
         }
         
         public static function parseInstallCommand()
