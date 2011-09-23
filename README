@@ -1,0 +1,3 @@
+RocketPack is an implementation of http://semver.org/
+for RocketSled package management and dependency.
+
