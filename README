@@ -4,4 +4,17 @@ on *nix using the RocketSled framework.
 
 See also: http://semver.org/
 
+A typical rocketpack.config.php file should looke
+like this:
 
+<?php
+    //note the second argument here is major, minor, patch
+    //versions
+    rocketpack\Install::package('YourPackage',array(1,1,1));
+
+    Dependcies::register(function()'
+    {
+        rocketpack\Dependency::forPackage('Murphy')
+        ->add('Args',array(0,1,0))
+        ->verify();
+    });
