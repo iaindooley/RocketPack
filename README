@@ -1,3 +1,7 @@
-RocketPack is an implementation of http://semver.org/
-for RocketSled package management and dependency.
+RocketPack is a GitHub and SemVer based dependency
+management system for PHP 5.3 applications running
+on *nix using the RocketSled framework.
+
+See also: http://semver.org/
+
 
