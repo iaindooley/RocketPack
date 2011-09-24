@@ -29,20 +29,23 @@
         
         private static function processDependency(Dependency $dep,$name,$version)
         {
-            $version = new Version($name,$version);
+            $to_compare = new Version($name,$version);
 
-            if(Install::ed($name))
+            if(!Install::ed($name))
             {
-                shell_exec(self::parseInstallCommand($name));
-                self::requireConfig($name);
-            }
+                $version_string = implode('.',$version);
+                echo shell_exec(self::parseInstallCommand($dep->for_package,$name));
+                
+                if($version_string != '0.0.0')
+                    echo shell_exec('cd '.realpath(PACKAGES_DIR).'/'.strtolower($name).' && git checkout '.$version_string);
 
-            else
-                throw new DependencyInstallException('Unable to install '.$name.' using '.self::parseInstallCommand($name));
+                require(realpath(PACKAGES_DIR).'/'.strtolower($name).'/rocketpack.config.php');
+                echo 'New package: '.$name.' installed. Re-run php index.php CheckDependencies'.PHP_EOL;
+            }
 
             try
             {
-                $version->compare(Install::version($name));
+                $to_compare->compare(Install::version($name));
             }
             
             catch(VersionMismatchException $exc)
@@ -63,12 +66,42 @@
             }
         }
         
-        public static function parseInstallCommand()
+        public static function parseInstallCommand($for_package,$name)
         {
-        }
-
-        public static function requireConfig($name)
-        {
+            //get the latest plist.txt
+            echo shell_exec('cd '.realpath(PACKAGES_DIR).'/rocketpack/ && git pull');
+            
+            $cmd = 'cd '.realpath(PACKAGES_DIR).' && git clone ';
+            $repos = array_filter(file(PACKAGES_DIR.'/rocketpack/plist.txt',FILE_IGNORE_NEW_LINES),
+            function($arg) use($name)
+            {
+                $ret = FALSE;
+                
+                if(\rocketsled\endsWith($arg,$name))
+                    $ret = $arg;
+                
+                return $ret;
+            });
+            
+            if(count($repos) > 1)
+            {
+                echo 'When attempting to install: '.$name.' for package: '.$for_package.' got more than one repository in plist.txt: '.PHP_EOL;
+                echo implode(PHP_EOL,$repos).PHP_EOL;
+                echo 'Sort that shit out yo!'.PHP_EOL;
+                echo 'Exiting due to errors'.PHP_EOL;
+                exit(1);
+            }
+            
+            else if(!count($repos))
+            {
+                echo 'When attempting to install: '.$name.' for package: '.$for_package.' got no matching repositories in plist.txt: '.PHP_EOL;
+                echo 'Sort that shit out yo!'.PHP_EOL;
+                echo 'Exiting due to errors'.PHP_EOL;
+                exit(1);
+            }
+            
+            $cmd .= trim(current($repos)).' '.strtolower($name);
+            return $cmd;
         }
     }
     

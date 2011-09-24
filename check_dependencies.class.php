@@ -16,7 +16,7 @@
             foreach($packs as $fname)
                 require($fname);
             
-            foreach($dependencies as $dep)
+            foreach(Dependencies::registered() as $dep)
                 $dep();
         }
     }

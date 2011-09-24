@@ -5,7 +5,7 @@
     {
         public function run()
         {
-            $version = new rocketpack\Version('nothing','1.1.1');
+            $version = new rocketpack\Version('nothing',array(1,1,1));
             $exceptions = array(new rocketpack\MinorVersionMismatchException('PluSQL','This is just a test'),
                                 new rocketpack\MajorVersionMismatchException('PluSQL','This is just a test'),
                                 new rocketpack\MajorVersionMismatchException('Murphy','This is just a test'),
