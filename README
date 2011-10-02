@@ -12,7 +12,7 @@ like this:
     //versions
     rocketpack\Install::package('YourPackage',array(1,1,1));
 
-    Dependcies::register(function()'
+    rocketpack\Dependcies::register(function()'
     {
         rocketpack\Dependency::forPackage('Murphy')
         ->add('Args',array(0,1,0))
