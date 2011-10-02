@@ -1,8 +1,9 @@
 <?php
+    use rocketpack\Dependencies;
     use rocketsled\filteredPackages;
     use rocketsled\endsWith;
     
-    class CheckDependencies implements rocketsled\Runnable
+    class RocketPack implements rocketsled\Runnable
     {
         public function run()
         {
