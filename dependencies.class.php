@@ -1,4 +1,7 @@
 <?php
+    namespace rocketpack;
+    use Closure;
+
     class Dependencies
     {
         private static $instance = NULL;
