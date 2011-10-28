@@ -37,7 +37,7 @@
                 echo shell_exec(self::parseInstallCommand($dep->for_package,$name));
                 
                 if($version_string != '0.0.0')
-                    echo shell_exec('cd '.realpath(PACKAGES_DIR).'/'.strtolower($name).' && git checkout '.$version_string);
+                    echo shell_exec('cd '.realpath(PACKAGES_DIR).'/'.strtolower($name).' && /usr/bin/env git checkout '.$version_string);
 
                 require(realpath(PACKAGES_DIR).'/'.strtolower($name).'/rocketpack.config.php');
                 echo 'New package: '.$name.' installed. Re-run php index.php CheckDependencies'.PHP_EOL;
@@ -69,9 +69,9 @@
         public static function parseInstallCommand($for_package,$name)
         {
             //get the latest plist.txt
-            echo shell_exec('cd '.realpath(PACKAGES_DIR).'/rocketpack/ && git pull');
+            echo shell_exec('cd '.realpath(PACKAGES_DIR).'/rocketpack/ && /usr/bin/env git pull');
             
-            $cmd = 'cd '.realpath(PACKAGES_DIR).' && git clone ';
+            $cmd = 'cd '.realpath(PACKAGES_DIR).' && /usr/bin/env git clone ';
             $repos = array_filter(file(PACKAGES_DIR.'/rocketpack/plist.txt',FILE_IGNORE_NEW_LINES),
             function($arg) use($name)
             {
