@@ -16,8 +16,8 @@ The only problem is that this then leads to problems managing installation and
 versionig of all these modules.
 
 RocketPack provides a simple way for packages to register dependencies on particular
-versions of various modules and have them automatically installed by downloading them
-from git.
+versions of various modules and have them automatically installed by cloning them from
+a remote git repository.
 
 ## Usage
 
