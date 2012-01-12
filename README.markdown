@@ -83,7 +83,7 @@ to your ```rocketpack.config.php``` file:
         ->add('Fragmentify',array(0,1,0))
         ->verify();
     });
-```A
+```
 
 When you want to install your package, rather than having to download and install each dependency individually, you can simply install your package in the packages directory of your RocketSled 
 install and run:
