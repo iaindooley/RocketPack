@@ -44,9 +44,9 @@ rocketpack\Dependencies::register(function()
 });
 ```
 
-That would state that YourPackage is dependent on ```PackageWeAreDependentOn``` version v0.1 and AnotherPackageWeAreDependentOn v1.1.
+That would state that YourPackage is dependent on ```PackageWeAreDependentOn``` version v0.1 and ```AnotherPackageWeAreDependentOn``` v1.1.
 
-This is what the completely ```rocketpack.config.php``` file would look like:
+This is what the complete ```rocketpack.config.php``` file would look like:
 
 ```php
 <?php
@@ -61,12 +61,31 @@ This is what the completely ```rocketpack.config.php``` file would look like:
     });
 ```
 
+NB: If you would like to leave the cloned out repository on head, use: ```array(0,0,0)``` for the version.
+
 ### Installing packages with RocketPack
 
 RocketPack works with https://github.com/iaindooley/RocketSled - see the RocketSled README file for more details on installation and configuration.
 
-Now imagine that you created a package that requires Args, PluSQL, Murphy and Fragmentify, all at version v0.1. When you want to install your package,
-rather than having to download and install each one individually, you can simply install your package in the packages directory of your RocketSled 
+Now imagine that you created a package that requires Args, PluSQL, Murphy and Fragmentify, all at version v0.1. You would add the following 
+to your ```rocketpack.config.php``` file:
+
+```php
+<?php
+    rocketpack\Install::package('YourPackage',array(0,1,0));
+    
+    rocketpack\Dependencies::register(function()
+    {
+        rocketpack\Dependency::forPackage('YourPackage')
+        ->add('PluSQL',array(0,1,0))
+        ->add('Murphy',array(0,1,0))
+        ->add('Args',array(0,1,0))
+        ->add('Fragmentify',array(0,1,0))
+        ->verify();
+    });
+```A
+
+When you want to install your package, rather than having to download and install each dependency individually, you can simply install your package in the packages directory of your RocketSled 
 install and run:
 
 ```
