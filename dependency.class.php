@@ -33,10 +33,13 @@
 
             if(!Install::ed($name))
             {
+                if(!end($version))
+                    array_pop($version);
+                
                 $version_string = implode('.',$version);
                 echo shell_exec(self::parseInstallCommand($dep->for_package,$name));
                 
-                if($version_string != '0.0.0')
+                if($version_string != '0.0')
                     echo shell_exec('cd '.escapeshellarg(realpath(PACKAGES_DIR)).'/'.strtolower($name).' && /usr/bin/env git checkout '.$version_string);
 
                 require(realpath(PACKAGES_DIR).'/'.strtolower($name).'/rocketpack.config.php');
