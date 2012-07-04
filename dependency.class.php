@@ -1,5 +1,5 @@
 <?php
-    namespace rocketpack;
+    namespace RocketPack;
     use Exception;
     
     class Dependency
@@ -15,32 +15,37 @@
             $this->for_package = $for_package;
         }
         
-        public static function forPackage($name)
+        public static function forPackage($repo)
         {
-            $dep = new Dependency($name);
+            $dep = new Dependency($repo);
             return $dep;
         }
         
-        public function add($name,$version)
+        public function add($repo,$version)
         {
-            self::processDependency($this,$name,$version);
+            self::processDependency($this,$repo,$version);
             return $this;
         }
         
-        private static function processDependency(Dependency $dep,$name,$version)
+        private static function processDependency(Dependency $dep,$repo,$version)
         {
-            $to_compare = new Version($name,$version);
+            $to_compare = new Version($repo,$version);
 
-            if(!Install::ed($name))
+            if(!Install::ed($repo))
             {
-                $version_string = implode('.',$version);
-                echo shell_exec(self::parseInstallCommand($dep->for_package,$name));
+                if(is_array($version))
+                    $version_string = implode('.',$version);
+                else
+                    $version_string = $version;
+
+                echo shell_exec(self::parseInstallCommand($dep->for_package,$repo));
                 
                 if($version_string != '0.0.0')
                     echo shell_exec('cd '.escapeshellarg(realpath(PACKAGES_DIR)).'/'.strtolower($name).' && /usr/bin/env git checkout '.$version_string);
 
+                $name = str_replace('.git','',basename($repo));
                 require(realpath(PACKAGES_DIR).'/'.strtolower($name).'/rocketpack.config.php');
-                echo 'New package: '.$name.' installed. Re-run php index.php CheckDependencies'.PHP_EOL;
+                echo 'New package: '.$name.' installed. Re-run php index.php RocketPack'.PHP_EOL;
             }
 
             try
@@ -66,42 +71,9 @@
             }
         }
         
-        public static function parseInstallCommand($for_package,$name)
+        public static function parseInstallCommand($for_package,$repo)
         {
-            //get the latest plist.txt
-            echo shell_exec('cd '.escapeshellarg(realpath(PACKAGES_DIR)).'/rocketpack/ && /usr/bin/env git pull');
-            
-            $cmd = 'cd '.escapeshellarg(realpath(PACKAGES_DIR)).' && /usr/bin/env git clone ';
-            $repos = array_filter(file(PACKAGES_DIR.'/rocketpack/plist.txt',FILE_IGNORE_NEW_LINES),
-            function($arg) use($name)
-            {
-                $ret = FALSE;
-                
-                if(\rocketsled\endsWith($arg,$name))
-                    $ret = $arg;
-                
-                return $ret;
-            });
-            
-            if(count($repos) > 1)
-            {
-                echo 'When attempting to install: '.$name.' for package: '.$for_package.' got more than one repository in plist.txt: '.PHP_EOL;
-                echo implode(PHP_EOL,$repos).PHP_EOL;
-                echo 'Sort that shit out yo!'.PHP_EOL;
-                echo 'Exiting due to errors'.PHP_EOL;
-                exit(1);
-            }
-            
-            else if(!count($repos))
-            {
-                echo 'When attempting to install: '.$name.' for package: '.$for_package.' got no matching repositories in plist.txt: '.PHP_EOL;
-                echo 'Sort that shit out yo!'.PHP_EOL;
-                echo 'Exiting due to errors'.PHP_EOL;
-                exit(1);
-            }
-            
-            $cmd .= trim(current($repos)).' '.strtolower($name);
-            return $cmd;
+            return 'cd '.escapeshellarg(realpath(PACKAGES_DIR)).' && /usr/bin/env git clone '.escapeshellarg(trim($repo));
         }
     }
     

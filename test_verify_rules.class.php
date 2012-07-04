@@ -1,7 +1,7 @@
 <?php
     use rocketpack\VerifyRules;
 
-    class TestVerifyRules implements rocketsled\Runnable
+    class TestVerifyRules implements RocketSled\Runnable
     {
         public function run()
         {

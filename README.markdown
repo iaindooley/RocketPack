@@ -1,10 +1,10 @@
 # RocketPack - package management for RocketSled
 
-RocketPack is a Git and SemVer based dependency
+RocketPack is a Git based dependency
 management system for PHP 5.3 applications running
 on *nix using the RocketSled framework.
 
-See also: http://semver.org/
+We recommend: http://semver.org/
 
 ## Goals
 
@@ -13,7 +13,7 @@ one is encouraged to create lots of very small and focused modules that do one t
 and do it well.
 
 The only problem is that this then leads to problems managing installation and 
-versionig of all these modules.
+versioning of all these modules.
 
 RocketPack provides a simple way for packages to register dependencies on particular
 versions of various modules and have them automatically installed by cloning them from
@@ -28,8 +28,11 @@ In order to use RocketPack, you should add a file called ```rocketpack.config.ph
 The first line registers your package and states the current version, using the SemVer 
 major/minor/patch format in an array as such:
 
+NB: you can also just use a version string as well if you don't use semver, however this will mean
+that RocketPack is unable to ignore patch and minor version mismatches
+
 ```php
-rocketpack\Install::package('YourPackage',array(0,1,0));
+rocketpack\Install::package('https://github.com/iaindooley/RocketPack',array(0,1,0));
 ```
 
 That would register YourPackage at v0.1. You can then add one or more dependencies:
@@ -37,28 +40,29 @@ That would register YourPackage at v0.1. You can then add one or more dependenci
 ```php
 rocketpack\Dependencies::register(function()
 {
-    rocketpack\Dependency::forPackage('YourPackage')
-    ->add('PackageWeAreDependentOn',array(0,1,0))
-    ->add('AnotherPackageWeAreDependentOn',array(1,1,0))
+    rocketpack\Dependency::forPackage('https://github.com/iaindooley/RocketPack')
+    ->add('https://github.com/iaindooley/Args',array(0,1,0))
+    ->add('https://github.com/iaindooley/Murphy',array(0,1,1))
     ->verify();
 });
 ```
 
-That would state that YourPackage is dependent on ```PackageWeAreDependentOn``` version v0.1 and ```AnotherPackageWeAreDependentOn``` v1.1.
+That would state that RocketPack is dependent on ```Args``` version v0.1 and ```Murphy``` v1.1.
 
 This is what the complete ```rocketpack.config.php``` file would look like:
 
 ```php
 <?php
-    rocketpack\Install::package('YourPackage',array(0,1,0));
+    rocketpack\Install::package('https://github.com/iaindooley/RocketPack',array(0,1,0));
 
     rocketpack\Dependencies::register(function()
     {
-        rocketpack\Dependency::forPackage('YourPackage')
-        ->add('PackageWeAreDependentOn',array(0,1,0))
-        ->add('AnotherPackageWeAreDependentOn',array(1,1,0))
+        rocketpack\Dependency::forPackage('https://github.com/iaindooley/RocketPack')
+        ->add('https://github.com/iaindooley/Args',array(0,1,0))
+        ->add('https://github.com/iaindooley/Murphy',array(0,1,1))
         ->verify();
     });
+
 ```
 
 NB: If you would like to leave the cloned out repository on head, use: ```array(0,0,0)``` for the version.
@@ -76,11 +80,11 @@ to your ```rocketpack.config.php``` file:
     
     rocketpack\Dependencies::register(function()
     {
-        rocketpack\Dependency::forPackage('YourPackage')
-        ->add('PluSQL',array(0,1,0))
-        ->add('Murphy',array(0,1,0))
-        ->add('Args',array(0,1,0))
-        ->add('Fragmentify',array(0,1,0))
+        rocketpack\Dependency::forPackage('http://github.com/yourname/YourPackage')
+        ->add('https://github.com/iaindooley/PluSQL',array(0,1,0))
+        ->add('https://github.com/iaindooley/Murphy',array(0,1,0))
+        ->add('https://github.com/iaindooley/Args',array(0,1,0))
+        ->add('https://github.com/iaindooley/Fragmentify',array(0,1,0))
         ->verify();
     });
 ```
@@ -100,3 +104,10 @@ keep running RocketPack until you get no output.
 
 In future it will keep running until it's gotten all dependencies.
 
+Note that the package paths just have to be any repo that can be executed with:
+
+```
+git clone
+```
+
+So you can use this to manage repos that you have setup on your own remote git servers, too.

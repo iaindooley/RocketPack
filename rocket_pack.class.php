@@ -1,15 +1,15 @@
 <?php
     use rocketpack\Dependencies;
-    use rocketsled\filteredPackages;
-    use rocketsled\endsWith;
+    use RocketSled\filteredPackages;
+    use RocketSled\endsWith;
     
-    class RocketPack implements rocketsled\Runnable
+    class RocketPack implements RocketSled\Runnable
     {
         public function run()
         {
-            $packs = rocketsled\filteredPackages(function($input)
+            $packs = RocketSled\filteredPackages(function($input)
             {
-                return rocketsled\endsWith($input,'rocketpack.config.php');
+                return RocketSled\endsWith($input,'rocketpack.config.php');
             });
             
             $dependencies = array();

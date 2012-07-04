@@ -1,5 +1,5 @@
 <?php
-    namespace rocketpack;
+    namespace RocketPack;
     use Exception;
     
     class Version

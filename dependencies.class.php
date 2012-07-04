@@ -1,5 +1,5 @@
 <?php
-    namespace rocketpack;
+    namespace RocketPack;
     use Closure;
 
     class Dependencies
