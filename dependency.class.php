@@ -54,7 +54,7 @@
                     echo shell_exec('cd '.escapeshellarg(realpath(PACKAGES_DIR)).'/'.escapeshellarg($name).' && /usr/bin/env git checkout '.$version_string);
                 }
 
-                require(realpath(PACKAGES_DIR).'/'.$name.'/rocketpack.config.php');
+                include(realpath(PACKAGES_DIR).'/'.$name.'/rocketpack.config.php');
                 echo 'New package: '.$name.' installed. Re-run php index.php RocketPack'.PHP_EOL;
             }
 
