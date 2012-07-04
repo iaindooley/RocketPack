@@ -1,5 +1,5 @@
 <?php
-    use rocketpack\Dependencies;
+    use RocketPack\Dependencies;
     use RocketSled\filteredPackages;
     use RocketSled\endsWith;
     
@@ -9,7 +9,7 @@
         {
             $packs = RocketSled\filteredPackages(function($input)
             {
-                return RocketSled\endsWith($input,'rocketpack.config.php');
+                return RocketSled\endsWith($input,'RocketPack.config.php');
             });
             
             $dependencies = array();

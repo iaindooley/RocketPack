@@ -44,7 +44,7 @@
                     echo shell_exec('cd '.escapeshellarg(realpath(PACKAGES_DIR)).'/'.strtolower($name).' && /usr/bin/env git checkout '.$version_string);
 
                 $name = str_replace('.git','',basename($repo));
-                require(realpath(PACKAGES_DIR).'/'.strtolower($name).'/rocketpack.config.php');
+                require(realpath(PACKAGES_DIR).'/'.strtolower($name).'/RocketPack.config.php');
                 echo 'New package: '.$name.' installed. Re-run php index.php RocketPack'.PHP_EOL;
             }
 

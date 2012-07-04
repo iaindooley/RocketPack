@@ -1,16 +1,16 @@
 <?php
-    use rocketpack\VerifyRules;
+    use RocketPack\VerifyRules;
 
     class TestDependency implements RocketSled\Runnable
     {
         public function run()
         {
             //NO ERRORS
-            rocketpack\Install::package('PluSQL',array(0,0,1));
-            rocketpack\Install::package('Args',array(0,0,1));
-            rocketpack\Install::package('Murphy',array(0,0,1));
+            RocketPack\Install::package('PluSQL',array(0,0,1));
+            RocketPack\Install::package('Args',array(0,0,1));
+            RocketPack\Install::package('Murphy',array(0,0,1));
 
-            rocketpack\Dependency::forPackage('MyApp')
+            RocketPack\Dependency::forPackage('MyApp')
             ->add('PluSQL',array(0,0,1))
             ->add('Args',array(0,0,1))
             ->add('Murphy',array(0,0,1))
@@ -19,11 +19,11 @@
                      ->also('Murphy',VerifyRules::MAJOR)
             );
             //WITH ERRORS
-            rocketpack\Install::package('PluSQL',array(0,1,2));
-            rocketpack\Install::package('Args',array(1,1,2));
-            rocketpack\Install::package('Murphy',array(1,1,2));
+            RocketPack\Install::package('PluSQL',array(0,1,2));
+            RocketPack\Install::package('Args',array(1,1,2));
+            RocketPack\Install::package('Murphy',array(1,1,2));
 
-            rocketpack\Dependency::forPackage('MyApp')
+            RocketPack\Dependency::forPackage('MyApp')
             ->add('PluSQL',array(0,0,1))
             ->add('Args',array(0,0,1))
             ->add('Murphy',array(0,0,1))

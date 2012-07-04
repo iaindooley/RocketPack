@@ -32,15 +32,15 @@ NB: you can also just use a version string as well if you don't use semver, howe
 that RocketPack is unable to ignore patch and minor version mismatches
 
 ```php
-rocketpack\Install::package('https://github.com/iaindooley/RocketPack',array(0,1,0));
+RocketPack\Install::package('https://github.com/iaindooley/RocketPack',array(0,1,0));
 ```
 
 That would register YourPackage at v0.1. You can then add one or more dependencies:
 
 ```php
-rocketpack\Dependencies::register(function()
+RocketPack\Dependencies::register(function()
 {
-    rocketpack\Dependency::forPackage('https://github.com/iaindooley/RocketPack')
+    RocketPack\Dependency::forPackage('https://github.com/iaindooley/RocketPack')
     ->add('https://github.com/iaindooley/Args',array(0,1,0))
     ->add('https://github.com/iaindooley/Murphy',array(0,1,1))
     ->verify();
@@ -53,11 +53,11 @@ This is what the complete ```rocketpack.config.php``` file would look like:
 
 ```php
 <?php
-    rocketpack\Install::package('https://github.com/iaindooley/RocketPack',array(0,1,0));
+    RocketPack\Install::package('https://github.com/iaindooley/RocketPack',array(0,1,0));
 
-    rocketpack\Dependencies::register(function()
+    RocketPack\Dependencies::register(function()
     {
-        rocketpack\Dependency::forPackage('https://github.com/iaindooley/RocketPack')
+        RocketPack\Dependency::forPackage('https://github.com/iaindooley/RocketPack')
         ->add('https://github.com/iaindooley/Args',array(0,1,0))
         ->add('https://github.com/iaindooley/Murphy',array(0,1,1))
         ->verify();
@@ -76,11 +76,11 @@ to your ```rocketpack.config.php``` file:
 
 ```php
 <?php
-    rocketpack\Install::package('YourPackage',array(0,1,0));
+    RocketPack\Install::package('YourPackage',array(0,1,0));
     
-    rocketpack\Dependencies::register(function()
+    RocketPack\Dependencies::register(function()
     {
-        rocketpack\Dependency::forPackage('http://github.com/yourname/YourPackage')
+        RocketPack\Dependency::forPackage('http://github.com/yourname/YourPackage')
         ->add('https://github.com/iaindooley/PluSQL',array(0,1,0))
         ->add('https://github.com/iaindooley/Murphy',array(0,1,0))
         ->add('https://github.com/iaindooley/Args',array(0,1,0))

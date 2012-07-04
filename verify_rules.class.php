@@ -39,7 +39,7 @@
             if(!isset($rules[$package_name]))
                 $rules[$package_name] = array();
             
-            $rules[$package_name][] = 'rocketpack\\'.$type;
+            $rules[$package_name][] = 'RocketPack\\'.$type;
         }
         
         public function verify($exceptions)
