@@ -9,15 +9,14 @@
         
         public function __construct($package,$version)
         {
-            if(count($version) != 3)
-                throw new InvalidVersionSchemaException('RocketPack version management only works with a 3 part version number, Major, Minor, Patch. You gave me: '.$version.' Check out http://semver.org/');
-                
             $this->version = $version;
             $this->package = $package;
         }
         
         public function compare($version)
         {
+            if(is_array($version))
+            {
             if(count($version) != 3)
                 throw new InvalidVersionSchemaException('RocketPack version management only works with a 3 part version number, Major, Minor, Patch. You gave me: '.$version.' Check out http://semver.org/');
 
@@ -27,6 +26,13 @@
                 throw new MinorVersionMismatchException($this->package,'Comparing '.implode('.',$this->version).' to '.implode('.',$version).' for package '.$this->package);
             if($this->version[2] != $version[2])
                 throw new PatchVersionMismatchException($this->package,'Comparing '.implode('.',$this->version).' to '.implode('.',$version).' for package '.$this->package);
+            }
+            
+            else
+            {
+                if($version != $this->version)
+                    throw new MajorVersionMismatchException($this->package,'Comparing: '.$this->version.' to '.$version.' for package: '.$this->package);
+            }
         }
     }
 

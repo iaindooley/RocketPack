@@ -34,23 +34,33 @@
             if(!Install::ed($repo))
             {
                 if(is_array($version))
+                {
+                    if(end($version) === 0)
+                        array_pop($version);
+                    if(end($version) === 0)
+                        array_pop($version);
+
                     $version_string = implode('.',$version);
+                }
+
                 else
                     $version_string = $version;
 
                 echo shell_exec(self::parseInstallCommand($dep->for_package,$repo));
+                $name = str_replace('.git','',basename($repo));
                 
                 if($version_string != '0.0.0')
-                    echo shell_exec('cd '.escapeshellarg(realpath(PACKAGES_DIR)).'/'.strtolower($name).' && /usr/bin/env git checkout '.$version_string);
+                {
+                    echo shell_exec('cd '.escapeshellarg(realpath(PACKAGES_DIR)).'/'.escapeshellarg($name).' && /usr/bin/env git checkout '.$version_string);
+                }
 
-                $name = str_replace('.git','',basename($repo));
-                require(realpath(PACKAGES_DIR).'/'.strtolower($name).'/RocketPack.config.php');
+                require(realpath(PACKAGES_DIR).'/'.$name.'/rocketpack.config.php');
                 echo 'New package: '.$name.' installed. Re-run php index.php RocketPack'.PHP_EOL;
             }
 
             try
             {
-                $to_compare->compare(Install::version($name));
+                $to_compare->compare(Install::version($repo));
             }
             
             catch(VersionMismatchException $exc)

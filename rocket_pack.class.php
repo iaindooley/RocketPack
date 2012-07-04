@@ -9,7 +9,7 @@
         {
             $packs = RocketSled\filteredPackages(function($input)
             {
-                return RocketSled\endsWith($input,'RocketPack.config.php');
+                return RocketSled\endsWith($input,'rocketpack.config.php');
             });
             
             $dependencies = array();

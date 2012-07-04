@@ -1,17 +1,17 @@
 <?php
-    use RocketPack\VerifyRules;
+    namespace RocketPack;
 
-    class TestVerifyRules implements RocketSled\Runnable
+    class TestVerifyRules implements \RocketSled\Runnable
     {
         public function run()
         {
-            $version = new RocketPack\Version('nothing',array(1,1,1));
-            $exceptions = array(new RocketPack\MinorVersionMismatchException('PluSQL','This is just a test'),
-                                new RocketPack\MajorVersionMismatchException('PluSQL','This is just a test'),
-                                new RocketPack\MajorVersionMismatchException('Murphy','This is just a test'),
-                                new RocketPack\MajorVersionMismatchException('Args','This is just a test'),
-                                new RocketPack\PatchVersionMismatchException('Args','This is just a test'),
-                                new RocketPack\PatchVersionMismatchException('PluSQL','This is just a test'),
+            $version = new Version('nothing',array(1,1,1));
+            $exceptions = array(new MinorVersionMismatchException('PluSQL','This is just a test'),
+                                new MajorVersionMismatchException('PluSQL','This is just a test'),
+                                new MajorVersionMismatchException('Murphy','This is just a test'),
+                                new MajorVersionMismatchException('Args','This is just a test'),
+                                new PatchVersionMismatchException('Args','This is just a test'),
+                                new PatchVersionMismatchException('PluSQL','This is just a test'),
                                );
             
             VerifyRules::ignore('PluSQL',VerifyRules::MAJOR)
