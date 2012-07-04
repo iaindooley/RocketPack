@@ -49,7 +49,7 @@
                 echo shell_exec(self::parseInstallCommand($dep->for_package,$repo));
                 $name = str_replace('.git','',basename($repo));
                 
-                if($version_string != '0.0.0')
+                if($version_string != '0')
                 {
                     echo shell_exec('cd '.escapeshellarg(realpath(PACKAGES_DIR)).'/'.escapeshellarg($name).' && /usr/bin/env git checkout '.$version_string);
                 }
