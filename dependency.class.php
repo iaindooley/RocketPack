@@ -54,8 +54,19 @@
                     echo shell_exec('cd '.escapeshellarg(realpath(PACKAGES_DIR)).'/'.escapeshellarg($name).' && /usr/bin/env git checkout '.$version_string);
                 }
 
-                @include_once(realpath(PACKAGES_DIR).'/'.$name.'/rocketpack.config.php');
-                echo 'New package: '.$name.' installed. Re-run php index.php RocketPack'.PHP_EOL;
+                // The path to the rocketpack.config.php - it will exist if this
+                // is a native RocketPack package
+                $rocketpack_config = realpath(PACKAGES_DIR).'/'.$name.'/rocketpack.config.php';
+                if(file_exists($rocketpack_config))
+                {
+                    require($rocketpack_config);
+                    echo 'New package: '.$name.' installed. Re-run php index.php RocketPack'.PHP_EOL;
+                }
+                else
+                {
+                    echo 'New package: '.$name.' installed.'.PHP_EOL;
+
+                }
             }
 
             try
