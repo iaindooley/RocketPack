@@ -7,18 +7,25 @@
         private $versions;
         private $exceptions;
         private $for_package;
+        private $install_directory;
 
         private function __construct($for_package)
         {
             $this->versions = array();
             $this->exceptions = array();
             $this->for_package = $for_package;
+            $this->install_directory = RocketSled::userland_dir();
         }
         
         public static function forPackage($repo)
         {
             $dep = new Dependency($repo);
             return $dep;
+        }
+        
+        public function into($directory)
+        {
+            $this->install_directory = $directory;
         }
         
         public function add($repo,$version)
@@ -46,17 +53,17 @@
                 else
                     $version_string = $version;
 
-                echo shell_exec(self::parseInstallCommand($dep->for_package,$repo));
-                $name = str_replace('.git','',basename($repo));
+
+                $name = RocketPack::packageName($dep->install_directory,$repo,$version);
+                echo shell_exec(self::parseInstallCommand($dep->install_directory,$repo,$name));
                 
                 if($version_string != '0')
-                {
-                    echo shell_exec('cd '.escapeshellarg(realpath(PACKAGES_DIR)).'/'.escapeshellarg($name).' && /usr/bin/env git checkout '.$version_string);
-                }
+                    echo shell_exec('cd '.escapeshellarg(realpath($dep->install_directory)).'/'.escapeshellarg($name).' && /usr/bin/env git checkout '.$version_string);
 
                 // The path to the rocketpack.config.php - it will exist if this
                 // is a native RocketPack package
-                $rocketpack_config = realpath(PACKAGES_DIR).'/'.$name.'/rocketpack.config.php';
+                $rocketpack_config = realpath($dep->install_directory).'/'.$name.'/rocketpack.config.php';
+                
                 if(file_exists($rocketpack_config))
                 {
                     require($rocketpack_config);
@@ -65,7 +72,6 @@
                 else
                 {
                     echo 'New package: '.$name.' installed.'.PHP_EOL;
-
                 }
             }
 
@@ -92,9 +98,9 @@
             }
         }
         
-        public static function parseInstallCommand($for_package,$repo)
+        public static function parseInstallCommand($install_directory,$repo,$name)
         {
-            return 'cd '.escapeshellarg(realpath(PACKAGES_DIR)).' && /usr/bin/env git clone '.escapeshellarg(trim($repo));
+            return 'cd '.escapeshellarg(realpath($install_directory)).' && /usr/bin/env git clone '.escapeshellarg(trim($repo).' '.escapeshellarg(trim($name)));
         }
     }
     

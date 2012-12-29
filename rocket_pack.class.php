@@ -20,4 +20,32 @@
             foreach(Dependencies::registered() as $dep)
                 $dep();
         }
+        
+        public static function require($directory,$repo,$version,$bootstrap_file)
+        {
+            require_once(self::installPath($directory,$repo,$version).'/'.$bootstrap_file);
+        }
+
+        public static function installPath($directory,$repo,$version)
+        {
+            return $directory.'/'.self::packageName($directory,$repo,$version);
+        }
+
+        public static function packageName($directory,$repo,$version)
+        {
+            $name = str_replace('.git','',basename($repo));
+
+            if($directory != RocketSled::userland_dir())
+            {
+                if(is_array($version))
+                    //just use major/minor and ignore patch
+                    $package_version = $version[0].'.'.$version[1];
+                else
+                    $package_version = $version;
+
+                $name .= '_'.$package_version;
+            }
+            
+            return $name;
+        }
     }

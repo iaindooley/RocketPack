@@ -49,6 +49,28 @@ RocketPack\Dependencies::register(function()
 
 That would state that RocketPack is dependent on ```Args``` version v0.1 and ```Murphy``` v1.1.
 
+You can use the into() method to change the install location:
+
+```php
+RocketPack\Dependencies::register(function()
+{
+    RocketPack\Dependency::forPackage('https://github.com/iaindooley/RocketPack')
+    ->into(RocketSled::rs_dir())
+    ->add('https://github.com/iaindooley/Args',array(0,1,0))
+    ->add('https://github.com/iaindooley/Murphy',array(0,1,1))
+    ->verify();
+});
+```
+
+If the directory you install into differs from RocketSled::userland_dir(), the 
+version will be appended to the install directory. If you are managing 
+dependencies which are not RocketSled compatible packages (ie. they do not
+conform to the default RocketSled autoload naming convention or don't have
+rs.config.php files in them so you need to require an autoload implementation)
+you can manage these using RocketPack by doing following.
+
+Firstly, create a PHP file in your package 
+
 This is what the complete ```rocketpack.config.php``` file would look like:
 
 ```php
@@ -58,8 +80,16 @@ This is what the complete ```rocketpack.config.php``` file would look like:
     RocketPack\Dependencies::register(function()
     {
         RocketPack\Dependency::forPackage('https://github.com/iaindooley/RocketPack')
+        ->into(RocketSled::rs_dir())
         ->add('https://github.com/iaindooley/Args',array(0,1,0))
         ->add('https://github.com/iaindooley/Murphy',array(0,1,1))
+        ->into(RocketSled::userland_dir())
+        ->add('your.server.com/path/to/Repo.git',array(0,1,0))
+        ->add('your.server.com/path/to/Other.git',array(0,1,1))
+        ->into(RocketSled::lib_dir())
+        ->add('https://github.com/SwiftMailer','v1.2.2')
+        ->into(RocketSled::root_dir())
+        ->add('https://github.com/jquery','v1.2.2')
         ->verify();
     });
 
