@@ -67,9 +67,56 @@ version will be appended to the install directory. If you are managing
 dependencies which are not RocketSled compatible packages (ie. they do not
 conform to the default RocketSled autoload naming convention or don't have
 rs.config.php files in them so you need to require an autoload implementation)
-you can manage these using RocketPack by doing following.
+you will run into the problem that you'll be hard coding a bunch of repos
+and version names into multiple places.
 
-Firstly, create a PHP file in your package 
+RocketPack gives you a hassle free way of managing this with a relatively
+simple strategy.
+
+Firstly, create a PHP file in your package called deps.php which looks something
+like this:
+
+```php
+<?php return array(
+          'http://github.com/user/RepoName' => array('version'  => 'v1.2.2',
+                                                     'autoload' => 'bootstrap.php'),
+          'http://github.com/user/OtherRepoName' => array('version'  => 'v1.2.3',
+                                                          'autoload' => 'other_bootstrap.php'),
+      );
+```
+
+Where the "bootstrap.php" files are the files that package requires you to include 
+to handle autloading.
+
+In your rocketpack.config.php file, you can then simply include this file and 
+loop through to install these into your lib dir:
+
+```php
+<?php
+    RocketPack\Dependencies::register(function()
+    {
+        $dep = RocketPack\Dependency::forPackage('https://github.com/iaindooley/RocketPack')
+        ->into(RocketSled::lib_dir());
+        
+        foreach(require_once(__DIR__.'/deps.php') as $repo => $data)
+            $dep->add($repo,$data['version']);
+
+        $dep->verify();
+    });
+```
+
+Then in your rs.config.php file where you need to inject the autoloading in, you can
+include the same file and use the RocketPack::autoload() method to include the correct
+version of the package, whether you're running locally with everything installed in
+a single directory, or running on a server with several packages included in a common
+codebase:
+
+```php
+<?php
+    foreach(require_once('deps.php') as $repo => $data)
+        RocketPack::autoload(RocketSled::lib_dir(),$repo,$data['version'],$data['autoload']);
+```
+
 
 This is what the complete ```rocketpack.config.php``` file would look like:
 

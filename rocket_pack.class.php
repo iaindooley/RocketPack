@@ -19,7 +19,7 @@
                 $dep();
         }
         
-        public static function require($directory,$repo,$version,$bootstrap_file)
+        public static function autoload($directory,$repo,$version,$bootstrap_file)
         {
             require_once(self::installPath($directory,$repo,$version).'/'.$bootstrap_file);
         }
