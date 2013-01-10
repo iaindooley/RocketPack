@@ -6,11 +6,13 @@
     {
         private $version;
         private $package;
+        private $directory;
         
-        public function __construct($package,$version)
+        public function __construct($directory,$package,$version)
         {
-            $this->version = $version;
-            $this->package = $package;
+            $this->version   = $version;
+            $this->package   = $package;
+            $this->directory = $directory;
         }
         
         public function compare($version)
@@ -28,11 +30,22 @@
                 throw new PatchVersionMismatchException($this->package,'Comparing '.implode('.',$this->version).' to '.implode('.',$version).' for package '.$this->package);
             }
             
-            else
+            else if($version)
             {
                 if($version != $this->version)
                     throw new MajorVersionMismatchException($this->package,'Comparing: '.$this->version.' to '.$version.' for package: '.$this->package);
             }
+            
+            else
+            {
+                if(!$this->packageInstalledForVersion())
+                    throw new MajorVersionMismatchException($this->package,'Could not find '.\RocketPack::installPath($this->directory,$this->package,$this->version).' for package: '.$this->package);
+            }
+        }
+        
+        public function packageInstalledForVersion()
+        {
+            return is_dir(\RocketPack::installPath($this->directory,$this->package,$this->version));
         }
     }
 

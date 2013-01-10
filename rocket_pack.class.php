@@ -21,7 +21,10 @@
         
         public static function autoload($directory,$repo,$version,$bootstrap_file)
         {
-            require_once(self::installPath($directory,$repo,$version).'/'.$bootstrap_file);
+            $path = self::installPath($directory,$repo,$version).'/'.$bootstrap_file;
+            
+            if(file_exists($path))
+                require_once($path);
         }
 
         public static function installPath($directory,$repo,$version)

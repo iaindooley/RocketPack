@@ -14,7 +14,7 @@
             $this->versions = array();
             $this->exceptions = array();
             $this->for_package = $for_package;
-            $this->install_directory = RocketSled::userland_dir();
+            $this->install_directory = \RocketSled::userland_dir();
         }
         
         public static function forPackage($repo)
@@ -26,6 +26,7 @@
         public function into($directory)
         {
             $this->install_directory = $directory;
+            return $this;
         }
         
         public function add($repo,$version)
@@ -36,9 +37,9 @@
         
         private static function processDependency(Dependency $dep,$repo,$version)
         {
-            $to_compare = new Version($repo,$version);
+            $to_compare = new Version($dep->install_directory,$repo,$version);
 
-            if(!Install::ed($repo))
+            if(!Install::ed($repo) && !$to_compare->packageInstalledForVersion())
             {
                 if(is_array($version))
                 {
@@ -54,7 +55,7 @@
                     $version_string = $version;
 
 
-                $name = RocketPack::packageName($dep->install_directory,$repo,$version);
+                $name = \RocketPack::packageName($dep->install_directory,$repo,$version);
                 echo shell_exec(self::parseInstallCommand($dep->install_directory,$repo,$name));
                 
                 if($version_string != '0')
@@ -100,7 +101,7 @@
         
         public static function parseInstallCommand($install_directory,$repo,$name)
         {
-            return 'cd '.escapeshellarg(realpath($install_directory)).' && /usr/bin/env git clone '.escapeshellarg(trim($repo).' '.escapeshellarg(trim($name)));
+            return 'cd '.escapeshellarg(realpath($install_directory)).' && /usr/bin/env git clone '.escapeshellarg(trim($repo)).' '.escapeshellarg(trim($name));
         }
     }
     
