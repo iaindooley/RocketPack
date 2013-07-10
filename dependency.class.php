@@ -94,7 +94,12 @@
         
         public static function parseInstallCommand($for_package,$repo)
         {
-            return 'cd '.escapeshellarg(realpath(PACKAGES_DIR)).' && /usr/bin/env git clone '.escapeshellarg(trim($repo));
+            $split = array_filter(explode(' ',$repo),function($to_filter)
+            {
+                return escapeshellarg($to_filter);
+            });
+
+            return 'cd '.escapeshellarg(realpath(PACKAGES_DIR)).' && /usr/bin/env git clone '.trim(implode(' ',$split));
         }
     }
     
