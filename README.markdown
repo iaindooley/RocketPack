@@ -1,190 +1,135 @@
-# RocketPack - package management for RocketSled
+# RocketPack - dependency manager for PHP 5.3+
 
-RocketPack is a Git based dependency
-management system for PHP 5.3 applications running
-on *nix using the RocketSled framework.
+RocketPack is a dependency management system for PHP 5.3+ applications.
 
-We recommend: http://semver.org/
+Currently it only supports dependencies using git on *nix but we could add
+additional version control systems in later on.
 
 ## Goals
 
-Working with a minimalist framework like https://github.com/iaindooley/RocketSled,
-one is encouraged to create lots of very small and focused modules that do one thing
-and do it well.
-
-The only problem is that this then leads to problems managing installation and 
-versioning of all these modules.
-
-RocketPack provides a simple way for packages to register dependencies on particular
-versions of various modules and have them automatically installed by cloning them from
-a remote git repository.
+ * Work like git submodules without the headaches
+ * Allow installation in multiple directories (eg. for shared codebases)
+ * Config files written in PHP (for hackability and general configurability)
+ * Framework and (repository) language agnostic
 
 ## Usage
 
 ### Versioning your packages with RocketPack
 
-In order to use RocketPack, you should add a file called ```rocketpack.config.php``` to your package.
-
-The first line registers your package and states the current version, using the SemVer 
-major/minor/patch format in an array as such:
-
-NB: you can also just use a version string as well if you don't use semver, however this will mean
-that RocketPack is unable to ignore patch and minor version mismatches
-
-```php
-RocketPack\Install::package('https://github.com/iaindooley/RocketPack',array(0,1,0));
-```
-
-That would register YourPackage at v0.1. You can then add one or more dependencies:
-
-```php
-RocketPack\Dependencies::register(function()
-{
-    RocketPack\Dependency::forPackage('https://github.com/iaindooley/RocketPack')
-    ->add('https://github.com/iaindooley/Args',array(0,1,0))
-    ->add('https://github.com/iaindooley/Murphy',array(0,1,1))
-    ->verify();
-});
-```
-
-That would state that RocketPack is dependent on ```Args``` version v0.1 and ```Murphy``` v1.1.
-
-You can use the into() method to change the install location:
-
-```php
-RocketPack\Dependencies::register(function()
-{
-    RocketPack\Dependency::forPackage('https://github.com/iaindooley/RocketPack')
-    ->into(RocketSled::rs_dir())
-    ->add('https://github.com/iaindooley/Args',array(0,1,0))
-    ->add('https://github.com/iaindooley/Murphy',array(0,1,1))
-    ->verify();
-});
-```
-
-If the directory you install into differs from RocketSled::userland_dir(), the 
-version will be appended to the install directory. If you are managing 
-dependencies which are not RocketSled compatible packages (ie. they do not
-conform to the default RocketSled autoload naming convention or don't have
-rs.config.php files in them so you need to require an autoload implementation)
-you will run into the problem that you'll be hard coding a bunch of repos
-and version names into multiple places.
-
-RocketPack gives you a hassle free way of managing this with a relatively
-simple strategy.
-
-Firstly, create a PHP file in your package called deps.php which looks something
-like this:
-
-```php
-<?php return array(
-          'http://github.com/user/RepoName' => array('version'  => 'v1.2.2',
-                                                     'autoload' => 'bootstrap.php'),
-          'http://github.com/user/OtherRepoName' => array('version'  => 'v1.2.3',
-                                                          'autoload' => 'other_bootstrap.php'),
-      );
-```
-
-Where the "bootstrap.php" files are the files that package requires you to include 
-to handle autloading.
-
-In your rocketpack.config.php file, you can then simply include this file and 
-loop through to install these into your lib dir:
+Create a rocketpack config file (called, for example, rocketpack.config.php) that looks like this:
 
 ```php
 <?php
-    RocketPack\Dependencies::register(function()
+    RocketPack\Dependency::register(function()
     {
-        $dep = RocketPack\Dependency::forPackage('https://github.com/iaindooley/RocketPack')
-        ->into(RocketSled::lib_dir());
-        
-        foreach(require_once(__DIR__.'/deps.php') as $repo => $data)
-            $dep->add($repo,$data['version']);
-
-        $dep->verify();
+        RocketPack\Dependency::into(dirname(__FILE__).'../')
+        ->add('https://github.com/iaindooley/Args')
+        ->add('https://github.com/iaindooley/Murphy','b5ad86d1193eb7efbe7be3ba26ff5b4e5a0476d4')
+        ;
     });
 ```
 
-Then in your rs.config.php file where you need to inject the autoloading in, you can
-include the same file and use the RocketPack::autoload() method to include the correct
-version of the package, whether you're running locally with everything installed in
-a single directory, or running on a server with several packages included in a common
-codebase:
+The first argument to the add() method can be anything that can be passed to git clone.
+
+For example you can change the name of the install directory:
 
 ```php
-<?php
-    foreach(require_once('deps.php') as $repo => $data)
-        RocketPack::autoload(RocketSled::lib_dir(),$repo,$data['version'],$data['autoload']);
-```
-
-
-This is what the complete ```rocketpack.config.php``` file would look like:
-
-```php
-<?php
-    RocketPack\Install::package('https://github.com/iaindooley/RocketPack',array(0,1,0));
-
-    RocketPack\Dependencies::register(function()
+    RocketPack\Dependency::register(function()
     {
-        RocketPack\Dependency::forPackage('https://github.com/iaindooley/RocketPack')
-        ->into(RocketSled::rs_dir())
-        ->add('https://github.com/iaindooley/Args',array(0,1,0))
-        ->add('https://github.com/iaindooley/Murphy',array(0,1,1))
-        ->into(RocketSled::userland_dir())
-        ->add('your.server.com/path/to/Repo.git',array(0,1,0))
-        ->add('your.server.com/path/to/Other.git',array(0,1,1))
-        ->into(RocketSled::lib_dir())
-        ->add('https://github.com/SwiftMailer','v1.2.2')
-        ->into(RocketSled::root_dir())
-        ->add('https://github.com/jquery','v1.2.2')
-        ->verify();
+        RocketPack\Dependency::into(dirname(__FILE__).'../')
+        ->add('https://github.com/iaindooley/Args')
+        ->add('https://github.com/iaindooley/Murphy','b5ad86d1193eb7efbe7be3ba26ff5b4e5a0476d4')
+        ->add('git@bitbucket.com:company/lowercaserepo CamelCaseRepo')
+        ;
     });
-
 ```
 
-NB: If you would like to leave the cloned out repository on head, use: ```array(0,0,0)``` for the version.
+The second argument can be anything that can be passed to git checkout. For example:
+
+```php
+    RocketPack\Dependency::register(function()
+    {
+        RocketPack\Dependency::into(dirname(__FILE__).'../')
+        ->add('https://github.com/iaindooley/Args')
+        ->add('https://github.com/iaindooley/Murphy','b5ad86d1193eb7efbe7be3ba26ff5b4e5a0476d4')
+        ->add('git@bitbucket.com:company/lowercaserepo CamelCaseRepo','-b some-branch origin/some-branch)
+        ;
+    });
+```
+
+The md5 hash of the second argument will be appended to the directory name which means that
+if you have packages with conflicting versions they will both be installed (see section below on
+conflicts).
+
+You can also chain calls to into() and install things into a bunch of different directories:
+
+```php
+RocketPack\Dependency::register(function()
+{
+    RocketPack\Dependency::into(dirname(__FILE__).'../')
+    ->add('https://github.com/iaindooley/Args')
+    ->add('https://github.com/iaindooley/Murphy','b5ad86d1193eb7efbe7be3ba26ff5b4e5a0476d4')
+    ->add('git@bitbucket.com:company/lowercaserepo CamelCaseRepo')
+    ->into($some_other_dir)
+    ->add('https://github.com/iaindooley/CrazyHorse')
+    ;
+});
+```
 
 ### Installing packages with RocketPack
 
-RocketPack works with https://github.com/iaindooley/RocketSled - see the RocketSled README file for more details on installation and configuration.
+In order to execute your RocketPack config files, just pass an array of full file paths
+into the RocketPack::install() method:
 
-Now imagine that you created a package that requires Args, PluSQL, Murphy and Fragmentify, all at version v0.1. You would add the following 
-to your ```rocketpack.config.php``` file:
+```php
+$packs = array(
+    'rocketpack.config.php',
+);
+
+RocketPack::install($packs);
+```
+
+NB: the file paths will just be passed into require_once() so you need to make sure
+you pass in the full file paths.
+
+## A complete example
+
+Create a file called rocketpack.config.php that looks like this:
 
 ```php
 <?php
-    RocketPack\Install::package('YourPackage',array(0,1,0));
-    
-    RocketPack\Dependencies::register(function()
+    RocketPack\Dependency::register(function()
     {
-        RocketPack\Dependency::forPackage('http://github.com/yourname/YourPackage')
-        ->add('https://github.com/iaindooley/PluSQL',array(0,1,0))
-        ->add('https://github.com/iaindooley/Murphy',array(0,1,0))
-        ->add('https://github.com/iaindooley/Args',array(0,1,0))
-        ->add('https://github.com/iaindooley/Fragmentify',array(0,1,0))
-        ->verify();
+        RocketPack\Dependency::into(dirname(__FILE__))
+        ->add('https://github.com/jquery/jquery','1.10.2')
+        ;
     });
 ```
+Create a file called install.php in the same directory that looks like this:
 
-When you want to install your package, rather than having to download and install each dependency individually, you can simply install your package in the packages directory of your RocketSled 
-install and run:
-
-```
-php index.php RocketPack
-```
-
-It will download all your dependencies and check them out to the correct versions. If you ever upgrade to a new version of a package, you can re-run
-RocketPack to make sure you haven't broken any dependencies.
-
-RocketPack currently doesn't "recursively" install packages, so if a newly downloaded package has dependencies they will not be retrieved. You should
-keep running RocketPack until you get no output.
-
-In future it will keep running until it's gotten all dependencies.
-
-Note that the package paths just have to be any repo that can be executed with:
-
-```
-git clone
+```php
+<?php
+    require_once('RocketPack/autoload.php');
+    $packs = array(
+        'rocketpack.config.php',
+    );
+    
+    RocketPack::install($packs);
 ```
 
-So you can use this to manage repos that you have setup on your own remote git servers, too.
+### Recursion
+
+If any of the packages you install contain a file called rocketpack.config.php the install
+process will be run again recursively.
+
+### Conflicts
+
+If any packages try to install conflicting versions of the same package in the same
+directory, then you will be able to tell because you will have two different directories
+for the same package but with different version hashes appended.
+
+Each package that RocketPack installs will contain a file called .rocketpack with the
+exact repo and version string used to install it which you can use to find out which
+packages are installing which versions and resolve the conflict (for example by 
+bumping the dependency/version number on one of your packages or figuring out a way
+to run both at once).

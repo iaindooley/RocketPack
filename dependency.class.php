@@ -1,108 +1,100 @@
 <?php
     namespace RocketPack;
-    use Exception;
-    
+    use Closure;
+
     class Dependency
     {
-        private $versions;
-        private $exceptions;
-        private $for_package;
         private $install_directory;
+        private $register;
+        private $new_packs;
+        private static $instance = NULL;
 
-        private function __construct($for_package)
+        private function __construct()
         {
-            $this->versions = array();
-            $this->exceptions = array();
-            $this->for_package = $for_package;
-            $this->install_directory = \RocketSled::userland_dir();
+            $this->register = array();
+            $this->new_packs = array();
+            $this->install_directory = NULL;
         }
         
-        public static function forPackage($repo)
+        public static function newPacks()
         {
-            $dep = new Dependency($repo);
-            return $dep;
+            return self::instance()->new_packs;
+        }
+
+        public static function register(Closure $func)
+        {
+            self::instance()->register[] = $func;
+        }
+
+        public function registered()
+        {
+            return self::instance()->register;
+        }
+
+        public static function reset()
+        {
+            self::$instance = NULL;
+        }
+
+        private static function instance()
+        {
+            if(self::$instance === NULL)
+                self::$instance = new Dependency();
+
+            return self::$instance;
+        }
+
+        public static function into($directory)
+        {
+            self::instance()->install_directory = $directory;
+            return self::instance();
         }
         
-        public function into($directory)
+        public function add($repo,$version = NULL)
         {
-            $this->install_directory = $directory;
-            return $this;
-        }
-        
-        public function add($repo,$version)
-        {
-            self::processDependency($this,$repo,$version);
+            if($pack = self::processDependency($this,$repo,$version))
+                $this->new_packs[] = $pack;
+
             return $this;
         }
         
         private static function processDependency(Dependency $dep,$repo,$version)
         {
-            $to_compare = new Version($dep->install_directory,$repo,$version);
+            $ret = FALSE;
+            exec(self::parseInstallCommand($dep->install_directory,$repo),$output,$ret);
+            $gitoutput = $output[0];
+            //Cloning into 'Args'...
+            if(preg_match("/Cloning into '(.*)'.../",$gitoutput,$matches))
+                $installed_in = $matches[1];
+            //fatal: destination path 'Args' already exists and is not an empty directory.
+            else if(preg_match("/fatal: destination path '(.*)' already exists and is not an empty directory./",$gitoutput,$matches))
+                $installed_in = $matches[1];
 
-            if(!Install::ed($repo) && !$to_compare->packageInstalledForVersion())
+            if($version !== NULL)
             {
-                if(is_array($version))
-                {
-                    if(end($version) === 0)
-                        array_pop($version);
-                    if(end($version) === 0)
-                        array_pop($version);
-
-                    $version_string = implode('.',$version);
-                }
-
-                else
-                    $version_string = $version;
-
-
-                $name = \RocketPack::packageName($dep->install_directory,$repo,$version);
-                echo shell_exec(self::parseInstallCommand($dep->install_directory,$repo,$name));
-                
-                if($version_string != '0')
-                    echo shell_exec('cd '.escapeshellarg(realpath($dep->install_directory)).'/'.escapeshellarg($name).' && /usr/bin/env git checkout '.$version_string);
-
-                // The path to the rocketpack.config.php - it will exist if this
-                // is a native RocketPack package
-                $rocketpack_config = realpath($dep->install_directory).'/'.$name.'/rocketpack.config.php';
-                
-                if(file_exists($rocketpack_config))
-                {
-                    require($rocketpack_config);
-                    echo 'New package: '.$name.' installed. Re-run php index.php RocketPack'.PHP_EOL;
-                }
-                else
-                {
-                    echo 'New package: '.$name.' installed.'.PHP_EOL;
-                }
-            }
-
-            try
-            {
-                $to_compare->compare(Install::version($repo));
+                $md5 = md5($version);
+                echo shell_exec('cd '.escapeshellarg(realpath($dep->install_directory)).'/'.escapeshellarg($installed_in).' && /usr/bin/env git checkout '.$version);
+                echo shell_exec('cd '.escapeshellarg(realpath($dep->install_directory)).'/ && mv '.escapeshellarg($installed_in).' '.escapeshellarg($installed_in.'-'.$md5));
+                $installed_in = $installed_in.'-'.$md5;
+                file_put_contents(realpath($dep->install_directory).'/'.$installed_in.'/.rocketpack',$repo.PHP_EOL.$version);
             }
             
-            catch(VersionMismatchException $exc)
-            {
-                $dep->exceptions[] = $exc;
-            }
+            if(file_exists(realpath($dep->install_directory).'/'.$installed_in.'/rocketpack.config.php'))
+                $ret = realpath($dep->install_directory).'/'.$installed_in.'/rocketpack.config.php';
+            
+            return $ret;
         }
         
-        public function verify(VerifyRules $rules = NULL)
+        public static function parseInstallCommand($install_directory,$repo)
         {
-            if(!$rules)
-                $rules = new VerifyRules();
+            if(!$install_directory)
+                $install_directory = '.';
 
-            if($out = $rules->verify($this->exceptions))
+            $split = array_filter(explode(' ',$repo),function($to_filter)
             {
-                echo ' ----- For package: '.$this->for_package.PHP_EOL;
-                echo $out.PHP_EOL;
-            }
-        }
-        
-        public static function parseInstallCommand($install_directory,$repo,$name)
-        {
-            return 'cd '.escapeshellarg(realpath($install_directory)).' && /usr/bin/env git clone '.escapeshellarg(trim($repo)).' '.escapeshellarg(trim($name));
+                return escapeshellarg($to_filter);
+            });
+
+            return 'cd '.escapeshellarg(realpath($install_directory)).' && /usr/bin/env git clone '.trim(implode(' ',$split)).' 2>&1';
         }
     }
-    
-    class DependencyInstallException extends Exception{}
