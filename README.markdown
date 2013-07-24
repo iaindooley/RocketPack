@@ -3,7 +3,7 @@
 RocketPack is a dependency management system for PHP 5.3+ applications.
 
 Currently it only supports dependencies using git on *nix but we could add
-additional version control systems in later on.
+additional version control and operating systems in later on.
 
 ## Goals
 
@@ -37,8 +37,6 @@ For example you can change the name of the install directory:
     RocketPack\Dependency::register(function()
     {
         RocketPack\Dependency::into(dirname(__FILE__).'../')
-        ->add('https://github.com/iaindooley/Args')
-        ->add('https://github.com/iaindooley/Murphy','b5ad86d1193eb7efbe7be3ba26ff5b4e5a0476d4')
         ->add('git@bitbucket.com:company/lowercaserepo CamelCaseRepo')
         ;
     });
@@ -50,21 +48,20 @@ The second argument can be anything that can be passed to git checkout. For exam
     RocketPack\Dependency::register(function()
     {
         RocketPack\Dependency::into(dirname(__FILE__).'../')
-        ->add('https://github.com/iaindooley/Args')
-        ->add('https://github.com/iaindooley/Murphy','b5ad86d1193eb7efbe7be3ba26ff5b4e5a0476d4')
         ->add('git@bitbucket.com:company/lowercaserepo CamelCaseRepo','-b some-branch origin/some-branch)
         ;
     });
 ```
 
-The md5 hash of the second argument will be appended to the directory name which means that
-if you have packages with conflicting versions they will both be installed (see section below on
-conflicts).
+When you install a package with RocketPack it will put a file called .rocketpack in the directory
+with the repo and version string in it. Any future attempts to install the same repo with a 
+different version will throw an exception of type RocketPack\DependencyException.
 
 You can also chain calls to into() and install things into a bunch of different directories:
 
+
 ```php
-RocketPack\Dependency::register(function()
+RocketPack\Dependency::register(function() use($some_other_dir)
 {
     RocketPack\Dependency::into(dirname(__FILE__).'../')
     ->add('https://github.com/iaindooley/Args')
@@ -79,7 +76,7 @@ RocketPack\Dependency::register(function()
 ### Installing packages with RocketPack
 
 In order to execute your RocketPack config files, just pass an array of full file paths
-into the RocketPack::install() method:
+to one or more RocketPack config files into the RocketPack::install() method:
 
 ```php
 $packs = array(
@@ -121,15 +118,3 @@ Create a file called install.php in the same directory that looks like this:
 
 If any of the packages you install contain a file called rocketpack.config.php the install
 process will be run again recursively.
-
-### Conflicts
-
-If any packages try to install conflicting versions of the same package in the same
-directory, then you will be able to tell because you will have two different directories
-for the same package but with different version hashes appended.
-
-Each package that RocketPack installs will contain a file called .rocketpack with the
-exact repo and version string used to install it which you can use to find out which
-packages are installing which versions and resolve the conflict (for example by 
-bumping the dependency/version number on one of your packages or figuring out a way
-to run both at once).
