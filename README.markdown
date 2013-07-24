@@ -48,7 +48,7 @@ The second argument can be anything that can be passed to git checkout. For exam
     RocketPack\Dependency::register(function()
     {
         RocketPack\Dependency::into(dirname(__FILE__).'../')
-        ->add('git@bitbucket.com:company/lowercaserepo CamelCaseRepo','-b some-branch origin/some-branch)
+        ->add('git@bitbucket.com:company/lowercaserepo CamelCaseRepo','-b some-branch origin/some-branch')
         ;
     });
 ```
