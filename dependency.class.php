@@ -1,6 +1,6 @@
 <?php
     namespace RocketPack;
-    use Closure;
+    use Closure,Exception;
 
     class Dependency
     {
@@ -61,7 +61,7 @@
         private static function processDependency(Dependency $dep,$repo,$version)
         {
             $ret = FALSE;
-            exec(self::parseInstallCommand($dep->install_directory,$repo),$output,$ret);
+            exec(self::parseInstallCommand($dep->install_directory,$repo),$output);
             $gitoutput = $output[0];
             //Cloning into 'Args'...
             if(preg_match("/Cloning into '(.*)'.../",$gitoutput,$matches))
@@ -70,14 +70,21 @@
             else if(preg_match("/fatal: destination path '(.*)' already exists and is not an empty directory./",$gitoutput,$matches))
                 $installed_in = $matches[1];
 
-            if($version !== NULL)
+            $rocketpack_file      = realpath($dep->install_directory).'/'.$installed_in.'/.rocketpack';
+            $rocketpack_signature = $repo.PHP_EOL.$version;
+
+            if(!file_exists($rocketpack_file))
+                file_put_contents($rocketpack_file,$repo.PHP_EOL.$version);
+            else
             {
-                $md5 = md5($version);
-                echo shell_exec('cd '.escapeshellarg(realpath($dep->install_directory)).'/'.escapeshellarg($installed_in).' && /usr/bin/env git checkout '.$version);
-                echo shell_exec('cd '.escapeshellarg(realpath($dep->install_directory)).'/ && mv '.escapeshellarg($installed_in).' '.escapeshellarg($installed_in.'-'.$md5));
-                $installed_in = $installed_in.'-'.$md5;
-                file_put_contents(realpath($dep->install_directory).'/'.$installed_in.'/.rocketpack',$repo.PHP_EOL.$version);
+                $existing_signature = file_get_contents($rocketpack_file);
+                
+                if($existing_signature != $rocketpack_signature)
+                    throw new DependencyException('Cannot install: '.$repo.' with version: '.$version.' in '.$dep->install_directory.' because it has already been installed: '.$existing_signature.'. Please either update your dependency or install to another directory');
             }
+
+            if($version !== NULL)
+                echo shell_exec('cd '.escapeshellarg(realpath($dep->install_directory)).'/'.escapeshellarg($installed_in).' && /usr/bin/env git checkout '.$version);
             
             if(file_exists(realpath($dep->install_directory).'/'.$installed_in.'/rocketpack.config.php'))
                 $ret = realpath($dep->install_directory).'/'.$installed_in.'/rocketpack.config.php';
@@ -98,3 +105,5 @@
             return 'cd '.escapeshellarg(realpath($install_directory)).' && /usr/bin/env git clone '.trim(implode(' ',$split)).' 2>&1';
         }
     }
+
+    class DependencyException extends Exception{}
