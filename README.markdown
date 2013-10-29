@@ -5,7 +5,7 @@ RocketPack is a dependency management system for PHP 5.3+ applications.
 Currently it only supports dependencies using git on *nix but we could add
 additional version control and operating systems in later on.
 
-#NB: If you were already using RocketPack before October 30, 2013, this is a new version that is setup to operate as a completely standalone package independent of RocketSled. If you would like to continue using the previous version, please use release tagged 0.2.2 and before and fork from there.
+###NB: If you were already using RocketPack before October 30, 2013, this is a new version that is setup to operate as a completely standalone package independent of RocketSled. If you would like to continue using the previous version, please use release tagged 0.2.2 and before and fork from there.
 
 ## Goals
 
