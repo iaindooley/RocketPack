@@ -64,11 +64,13 @@
             exec(self::parseInstallCommand($dep->install_directory,$repo),$output);
             $gitoutput = $output[0];
             //Cloning into 'Args'...
-            if(preg_match("/Cloning into '(.*)'.../",$gitoutput,$matches))
+            if(preg_match("/Cloning into '?(.*)'?.../",$gitoutput,$matches))
                 $installed_in = $matches[1];
             //fatal: destination path 'Args' already exists and is not an empty directory.
             else if(preg_match("/fatal: destination path '(.*)' already exists and is not an empty directory./",$gitoutput,$matches))
                 $installed_in = $matches[1];
+            else
+                throw new Exception('Unexpected gitoutput: "'.$gitoutput.'"');
 
             $rocketpack_file      = realpath($dep->install_directory).'/'.$installed_in.'/.rocketpack';
             $rocketpack_signature = $repo.PHP_EOL.$version;
