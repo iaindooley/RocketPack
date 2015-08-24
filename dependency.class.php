@@ -72,6 +72,10 @@
             else
                 throw new Exception('Unexpected gitoutput: "'.$gitoutput.'"');
 
+            if (strpos($installed_in, "'") !== FALSE){
+                $installed_in = str_replace("'", "", $installed_in);
+            }
+
             $rocketpack_file      = realpath($dep->install_directory).'/'.$installed_in.'/.rocketpack';
             $rocketpack_signature = $repo.PHP_EOL.$version;
 
@@ -88,6 +92,8 @@
             if($version !== NULL)
                 echo shell_exec('cd '.escapeshellarg(realpath($dep->install_directory)).'/'.escapeshellarg($installed_in).' && /usr/bin/env git checkout '.$version);
             
+            echo shell_exec('cd '.escapeshellarg(realpath($dep->install_directory)).'/'.escapeshellarg($installed_in).' && /usr/bin/env git pull');
+
             if(file_exists(realpath($dep->install_directory).'/'.$installed_in.'/rocketpack.config.php'))
                 $ret = realpath($dep->install_directory).'/'.$installed_in.'/rocketpack.config.php';
             
