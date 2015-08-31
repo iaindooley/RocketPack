@@ -26,7 +26,7 @@
             self::instance()->register[] = $func;
         }
 
-        public function registered()
+        public static function registered()
         {
             return self::instance()->register;
         }
